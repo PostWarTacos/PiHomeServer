@@ -66,27 +66,27 @@ echo "Create SSH key pair on remote PC (ie: your Windows machine)"
 
 # RootLogin
 sed -i -e "/PermitRootLogin/s/yes/no/" /etc/ssh/sshd_config
-sed -i -e "/#PermitRootLogin/s/#//"
+sed -i -e "/#PermitRootLogin/s/#//" /etc/ssh/sshd_config
 
 # PubKey Auth
 sed -i -e "/PubkeyAuthentication/s/no/yes/" /etc/ssh/sshd_config
-sed -i -e "/#PubkeyAuthentication/s/#//"
+sed -i -e "/#PubkeyAuthentication/s/#//" /etc/ssh/sshd_config
 
 # PW Auth
 sed -i -e "/PasswordAuthentication/s/no/yes/" /etc/ssh/sshd_config
-sed -i -e "/#PasswordAuthentication/s/#//"
+sed -i -e "/#PasswordAuthentication/s/#//" /etc/ssh/sshd_config
 
 # GSSAPIAuthentication = yes
 sed -i -e "/GSSAPIAuthentication/s/no/yes/" /etc/ssh/sshd_config
-sed -i -e "/^GSSAPIAuthentication/s/GSSAPIAuthentication/#GSSAPIAuthentication/"
+sed -i -e "/^GSSAPIAuthentication/s/GSSAPIAuthentication/#GSSAPIAuthentication/" /etc/ssh/sshd_config
 
 # GSSAPICleanupCredentials = no
 sed -i -e "/GSSAPICleanupCredentials/s/yes/no/" /etc/ssh/sshd_config
-sed -i -e "/^GSSAPICleanupCredentials/s/GSSAPIAuthentication/#GSSAPIAuthentication/"
+sed -i -e "/^GSSAPICleanupCredentials/s/GSSAPIAuthentication/#GSSAPIAuthentication/" /etc/ssh/sshd_config
 
 # UsePAM
 sed -i -e "/UsePAM/s/no/yes/" /etc/ssh/sshd_config
-sed -i -e "/#UsePAM/s/#//"
+sed -i -e "/#UsePAM/s/#//" /etc/ssh/sshd_config
 
 
 #
