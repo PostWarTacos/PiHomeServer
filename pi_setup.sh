@@ -58,7 +58,7 @@ echo "0 3 * * 3 root /usr/local/bin/apt_upgrade.sh >> /var/log/apt/auto_apt_upda
 #
 
 # Prompt to create SSH on remote hostname
-read -p "This step will create an SSH key pair for user to access server without password, so long as the remote PC has the private key. Do you wish to complete this step? (y/n)" ssh_answer
+read -p "This step will create an SSH key pair for user to access server without password, so long as the remote PC has the private key. Do you wish to complete this step? (y/n) " ssh_answer
 if [ $ssh_answer == 'y' ] || [ $ssh_answer == 'Y' ]; then
 
   export $new_user
@@ -141,7 +141,7 @@ chmod 755 -R /dockerdata
 # NFS shares
 #
 
-read -p "This step will create an NFS share on remote and connect to it. Do you wish to complete this step? (y/n)" nfs_answer
+read -p "This step will create an NFS share on remote and connect to it. Do you wish to complete this step? (y/n) " nfs_answer
 if [ $nfs_answer == 'y' ] || [ $nfs_answer == 'Y' ]; then
   # Prompt for NFS shares to be created on remote system
   read -p "User must create NFS shares on remote PC. Press enter when action is completed." useless_answer
@@ -163,7 +163,7 @@ if [ $nfs_answer == 'y' ] || [ $nfs_answer == 'Y' ]; then
 fi
 
 # Manually delete ubuntu account after logging to $new_user
-read -p "PiHomeServer setup is complete. Please manually delete the default ubuntu account. Host requires reboot. Do you wish to reboot now? (y/n)." reboot_answer
+read -p "PiHomeServer setup is complete. Please manually delete the default ubuntu account. Host requires reboot. Do you wish to reboot now? (y/n) " reboot_answer
 if [ $reboot_answer == 'y' ] || [ $reboot_answer == 'Y' ]; then
     reboot
 fi
