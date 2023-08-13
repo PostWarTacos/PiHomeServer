@@ -61,37 +61,39 @@ echo "0 3 * * 3 root /usr/local/bin/apt_upgrade.sh >> /var/log/apt/auto_apt_upda
 read -p "This step will create an SSH key pair for user to access server without password, so long as the remote PC has the private key. Do you wish to complete this step? (y/n)" ssh_answer
 if [ $ssh_answer == 'y' ] || [ $ssh_answer == 'Y' ]; then
 
-    read -p "User must create SSH key pair on remote PC. Suggest using pubkey_create_win.ps1 (if remote PC is Windows) or pubkey_create_nix.sh (if remote PC is *nix) found on https://github.dev/PostWarTacos/PiHomeServer. Press enter when action is completed." useless_answer
+  export $new_user
 
-    # Move SSH pubkey to Pi. Done from remote PC with pubkey_create script
+  read -p "User must create SSH key pair on remote PC. Suggest using pubkey_create_win.ps1 (if remote PC is Windows) or pubkey_create_nix.sh (if remote PC is *nix) found on https://github.dev/PostWarTacos/PiHomeServer. Press enter when action is completed." useless_answer
 
-    #
-    # Lock down SSH permissions
-    #
+  # Move SSH pubkey to Pi. Done from remote PC with pubkey_create script
 
-    # RootLogin
-    sed -i -e "/PermitRootLogin/s/yes/no/" /etc/ssh/sshd_config
-    sed -i -e "/#PermitRootLogin/s/#//" /etc/ssh/sshd_config
+  #
+  # Lock down SSH permissions
+  #
 
-    # PubKey Auth
-    sed -i -e "/PubkeyAuthentication/s/no/yes/" /etc/ssh/sshd_config
-    sed -i -e "/#PubkeyAuthentication/s/#//" /etc/ssh/sshd_config
+  # RootLogin
+  sed -i -e "/PermitRootLogin/s/yes/no/" /etc/ssh/sshd_config
+  sed -i -e "/#PermitRootLogin/s/#//" /etc/ssh/sshd_config
 
-    # PW Auth
-    sed -i -e "/PasswordAuthentication/s/no/yes/" /etc/ssh/sshd_config
-    sed -i -e "/#PasswordAuthentication/s/#//" /etc/ssh/sshd_config
+  # PubKey Auth
+  sed -i -e "/PubkeyAuthentication/s/no/yes/" /etc/ssh/sshd_config
+  sed -i -e "/#PubkeyAuthentication/s/#//" /etc/ssh/sshd_config
 
-    # GSSAPIAuthentication = yes
-    sed -i -e "/GSSAPIAuthentication/s/no/yes/" /etc/ssh/sshd_config
-    sed -i -e "/^GSSAPIAuthentication/s/GSSAPIAuthentication/#GSSAPIAuthentication/" /etc/ssh/sshd_config
+  # PW Auth
+  sed -i -e "/PasswordAuthentication/s/no/yes/" /etc/ssh/sshd_config
+  sed -i -e "/#PasswordAuthentication/s/#//" /etc/ssh/sshd_config
 
-    # GSSAPICleanupCredentials = no
-    sed -i -e "/GSSAPICleanupCredentials/s/yes/no/" /etc/ssh/sshd_config
-    sed -i -e "/^GSSAPICleanupCredentials/s/GSSAPIAuthentication/#GSSAPIAuthentication/" /etc/ssh/sshd_config
+  # GSSAPIAuthentication = yes
+  sed -i -e "/GSSAPIAuthentication/s/no/yes/" /etc/ssh/sshd_config
+  sed -i -e "/^GSSAPIAuthentication/s/GSSAPIAuthentication/#GSSAPIAuthentication/" /etc/ssh/sshd_config
 
-    # UsePAM
-    sed -i -e "/UsePAM/s/no/yes/" /etc/ssh/sshd_config
-    sed -i -e "/#UsePAM/s/#//" /etc/ssh/sshd_config
+  # GSSAPICleanupCredentials = no
+  sed -i -e "/GSSAPICleanupCredentials/s/yes/no/" /etc/ssh/sshd_config
+  sed -i -e "/^GSSAPICleanupCredentials/s/GSSAPIAuthentication/#GSSAPIAuthentication/" /etc/ssh/sshd_config
+
+  # UsePAM
+  sed -i -e "/UsePAM/s/no/yes/" /etc/ssh/sshd_config
+  sed -i -e "/#UsePAM/s/#//" /etc/ssh/sshd_config
 fi
 
 #
@@ -141,23 +143,23 @@ chmod 755 -R /dockerdata
 
 read -p "This step will create an NFS share on remote and connect to it. Do you wish to complete this step? (y/n)" nfs_answer
 if [ $nfs_answer == 'y' ] || [ $nfs_answer == 'Y' ]; then
-    # Prompt for NFS shares to be created on remote system
-    read -p "User must create NFS shares on remote PC. Press enter when action is completed." useless_answer
-    read -p "Enter IP address of remote PC: " remote_ip
-    read -p "Enter full path of the NFS share created on remote PC (/volume1/Plex): " remote_nfs
+  # Prompt for NFS shares to be created on remote system
+  read -p "User must create NFS shares on remote PC. Press enter when action is completed." useless_answer
+  read -p "Enter IP address of remote PC: " remote_ip
+  read -p "Enter full path of the NFS share created on remote PC (/volume1/Plex): " remote_nfs
 
-    # Build folders locally for NFS to mount
-    read -p "Creating local folder for NFS share. Enter folder name that will be locally accessible and connected to the NFS share on remote PC (ex: /Plex): " local_nfs
-    mkdir $local_nfs
+  # Build folders locally for NFS to mount
+  read -p "Creating local folder for NFS share. Enter folder name that will be locally accessible and connected to the NFS share on remote PC (ex: /Plex): " local_nfs
+  mkdir $local_nfs
 
-    # Apply folder permissions
-    chown $new_user -R $local_nfs
-    chmod 755 -R $local_nfs
+  # Apply folder permissions
+  chown $new_user -R $local_nfs
+  chmod 755 -R $local_nfs
 
-    # Mount NFS in /etc/fstab
-    # <file system>                       <dir>           <type>  <options>       <dump>  <pass>
-    echo "$remote_ip:$remote_nfs          $local_nfs      nfs     defaults        0       0" >> /etc/fstab
-    echo "NFS share should appear at $local_nfs after reboot "
+  # Mount NFS in /etc/fstab
+  # <file system>                       <dir>           <type>  <options>       <dump>  <pass>
+  echo "$remote_ip:$remote_nfs          $local_nfs      nfs     defaults        0       0" >> /etc/fstab
+  echo "NFS share should appear at $local_nfs after reboot "
 fi
 
 # Manually delete ubuntu account after logging to $new_user
