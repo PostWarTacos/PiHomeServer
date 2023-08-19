@@ -4,3 +4,5 @@ apt update
 apt upgrade -y
 # Remove any unneeded packages
 apt autoremove -y
+# Reboot
+sudo reboot
