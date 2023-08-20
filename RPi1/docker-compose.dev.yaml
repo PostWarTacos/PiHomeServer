@@ -1,0 +1,310 @@
+# Docker compose to set up containers for all services you need:
+#
+#   Gluetun VPN for
+#   Sonarr, Radarr, Readarr, Qbittorrent, JDownloader
+#   NZBGet, Overseerr, and Jackett
+#
+# Before running docker-compose, you should pre-create all of the following folders.
+
+# Folders for Docker State:
+# /dockerdata                       - docker root 
+# /dockerdata/compose/downloader    - Where this docker-compose.yml should live
+# /dockerdata/compose/utilities     - Where utilities docker-compose.yml should live
+# /dockerdata/sonarr                - Sonarr config and DB
+# /dockerdata/radarr                - Radarr config and DB
+# /dockerdata/readarr               - Readarr config and DB
+# /dockerdata/qbt                   - QBitorrent config and DB
+# /dockerdata/gluetun               - Gluetun servers.json
+# /dockerdata/jackett               - Jackett config
+# /dockerdata/overseerr             - Overseerr config
+
+
+# Folders for media
+# Be sure to mounted folders
+# Permissions for all NFS shares should be 740
+# <NAS_IP>/volume1/Plex                 - Plex config and DB; Mounted locally to /Plex
+# <NAS_IP>/volume1/Plex/complete        - Completed Plex downloads; Mounted locally to /Plex
+# <NAS_IP>/volume1/Plex/incomplete      - Incomplete Plex downloads; Mounted locally to /Plex
+# <NAS_IP>/volume1/JDownloader          - Media downloaded by JDownloader; Mounted locally to /JDownloader
+# <NAS_IP>/volume1/Readarr/books        - Books downloaded; Mounted locally to /Readarr
+# <NAS_IP>/volume1/Readarr/incomplete   - Books currently being downloaded; Mounted locally to /Readarr
+
+version: "3"
+services:
+
+########################################################
+
+# VPNs
+
+########################################################
+
+# Gluetun VPN
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    ports:
+      # QBT UI port
+      - 8090:8090
+      # QBT port
+      - 6881:6881
+      - 6881:6881/udp
+      # NZBget port
+      - 6789:6789
+      # MyJD port
+      - 3129:3129
+      # Web port
+      - 8080:8080
+      # Overseerr UI port
+      - 5055:5055
+      # Jackett UI port
+      - 9117:9117
+      # Sonarr port
+      - 8989:8989
+      # Readarr port
+      - 8787:8787
+      # Radarr port
+      - 7878:7878
+    privileged: true
+    tty: true
+    volumes:
+      - /dockerdata/gluetun:/gluetun
+    environment:
+      TZ: AMERICA/CHICAGO
+      
+      LOG_LEVEL: DEBUG
+
+      VPN_SERVICE_PROVIDER: private internet access
+      
+      OPENVPN_USER_SECRETFILE: /run/secrets/pia-user
+      OPENVPN_PASSWORD_SECRETFILE: /run/secrets/pia-password
+      
+      SERVER_REGIONS: CA Toronto
+    restart: always
+    secrets:
+      - pia-user
+      - pia-password
+
+########################################################
+
+# Download Managers
+
+##########################################7##############
+
+# Jackett
+  jackett:
+    image: linuxserver/jackett
+    container_name: jackett
+    environment:
+      TZ: AMERICA/CHICAGO
+
+      LOG_LEVEL: DEBUG
+
+      PUID: 1000
+      PGID: 101
+    volumes:
+      - /dockerdata/jackett:/jackett
+      - /dockerdata/downloads:/downloads
+    network_mode: service:gluetun
+    restart: unless-stopped
+
+# Readarr
+  readarr:
+    image: cr.hotio.dev/hotio/readarr
+    container_name: readarr
+    environment:
+      TZ: AMERICA/CHICAGO
+
+      LOG_LEVEL: DEBUG
+
+      PUID: 1000
+      PGID: 101
+      UMASK: 002
+
+    volumes:
+      - /Readarr/books:/books 
+      - /Readarr/incomplete:/downloads
+      - /dockerdata/readarr:/config
+    network_mode: service:gluetun
+    restart: unless-stopped
+    depends_on:
+      - qbittorrent
+      - jackett
+
+# Radarr
+  radarr:
+    image: linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      TZ: AMERICA/CHICAGO
+
+      LOG_LEVEL: DEBUG
+
+      PUID: 1000
+      PGID: 101
+      UMASK: 002
+
+    volumes:
+      - /dockerdata/radarr:/config
+      - /Plex/complete:/movies
+      - /Plex/incomplete:/downloads
+    network_mode: service:gluetun
+    restart: unless-stopped
+    depends_on:
+      - qbittorrent
+      - jackett
+
+# Sonarr
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      TZ: AMERICA/CHICAGO
+
+      LOG_LEVEL: DEBUG
+
+      PUID: 1000
+      PGID: 101
+      UMASK: 002
+
+    volumes:
+      - /dockerdata/sonarr:/config
+      - /Plex/complete:/tv
+      - /Plex/incomplete:/downloads
+    network_mode: service:gluetun
+    restart: unless-stopped
+    depends_on:
+      - qbittorrent
+      - jackett
+
+########################################################
+
+# Website
+
+########################################################
+
+# Overseerr
+  overseerr:
+    image: sctx/overseerr:latest
+    container_name: overseerr
+    environment:
+      TZ: AMERICA/CHICAGO
+
+      LOG_LEVEL: DEBUG
+
+      PORT: 5055
+
+#    ports:
+#      - 5055:5055
+    volumes:
+      - /dockerdata/overseerr:/app/config
+    network_mode: service:gluetun 
+    restart: unless-stopped
+
+########################################################
+
+# Downloaders
+
+########################################################
+
+# Qbittorrent
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      TZ: AMERICA/CHICAGO
+
+      LOG_LEVEL: INFO
+      
+      PUID: 1000
+      PGID: 101
+      
+      UMASK_SET: 022
+
+      WEBUI_PORT: 8090
+
+    volumes:
+      - /dockerdata/qbt:/config
+      - /Plex/incomplete:/downloads
+    network_mode: service:gluetun
+    restart: unless-stopped
+
+# NZBget
+  nzbget:
+    image: lscr.io/linuxserver/nzbget:latest
+    container_name: nzbget
+    environment:
+      TZ: AMERICA/CHICAGO
+
+      PUID: 1000
+      PGID: 1000
+
+      #- NZBGET_USER=nzbget #optional
+      #- NZBGET_PASS=tegbzn6789 #optional
+    volumes:
+      - /dockerdata/nzbget:/config
+      - /Plex/complete:/downloads
+    network_mode: service:gluetun
+    restart: unless-stopped
+
+# JDownloader
+  jdownloader:
+    image: jaymoulin/jdownloader
+    container_name: jdownloader
+    environment:
+      TZ: AMERICA/CHICAGO
+
+      LOG_LEVEL: INFO
+      
+      PUID: 1000
+      PGID: 1000
+      
+      FILE_MYJD_USER: myjd-user
+      FILE_MYJD_PASSWORD: myjd-password
+    
+    volumes:
+      - /JDownloader/downloads:/opt/JDownloader/Downloads
+      - /dockerdata/jdownloader/config:/opt/JDownloader/app/cfg
+      - /dockerdata/jdownloader/logs:/opt/JDownloader/app/logs
+      - /dockerdata/jdownloader/extensions:/opt/JDownloader/app/extensions
+    network_mode: service:gluetun
+    restart: always
+    secrets:
+      - myjd-user
+      - myjd-password
+
+########################################################
+
+# Docker Management
+
+########################################################
+
+# Docker Socket Proxy
+  socket-proxy:
+    container_name: docker-socket-proxy
+    image: tecnativa/docker-socket-proxy
+    privileged: true
+    environment:
+      CONTAINERS: 1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 2375:2375
+    restart: unless-stopped
+    
+########################################################
+
+# Secrets
+
+########################################################
+
+secrets:
+  myjd-user:
+    file: /dockerdata/compose/secrets/myjd_user.txt
+  myjd-password:
+    file: /dockerdata/compose/secrets/myjd_password.txt
+  pia-user:
+    file: /dockerdata/compose/secrets/pia_user.txt
+  pia-password:
+    file: /dockerdata/compose/secrets/pia_password.txt
