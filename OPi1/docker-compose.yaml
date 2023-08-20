@@ -1,0 +1,87 @@
+# Docker compose to set up containers for all services you need:
+#   
+#   Minecraft
+#   RWA-RCON
+#
+# Before running docker-compose, you should pre-create all of the following folders.
+
+# Folders for Docker State:
+# /dockerdata                       - docker root 
+# /dockerdata/minecraft             - MC config
+
+# Folders for media
+# Be sure to mounted folders
+# Permissions for all NFS shares should be 740
+# <NAS_IP>/volume1/Minecraft                 - Minecraft jar file; Mounted locally to /MC
+
+version: "3"
+services:
+
+########################################################
+
+# Minecraft
+
+########################################################
+
+# Minecraft Java Edition Server
+  mc:
+    image: itzg/minecraft-server
+    container_name: Minecraft-Java
+    tty: true
+    stdin_open: true
+    ports:
+      - 25565:25565
+    environment:
+      EULA: "TRUE"
+      TZ: AMERICA/CHICAGO
+      MOTD: "Welcome To The NipRip"
+      OVERRIDE_SERVER_PROPERTIES: "true"
+      DEBUG: "true"
+
+      # Hardware configs
+      MEMORY: 10G
+      VIEW_DISTANCE: 10
+      MAX_PLAYERS: 10
+
+      # Permissions based settings
+      PVP: "false"
+      CONSOLE: "false"
+      ALLOW_FLIGHT: "false"
+      OPS: "PostWarTacos"
+
+      # MODS
+      TYPE: FORGE
+      VERSION: 1.20.1
+      FORGE_VERSION: 47.1.3
+      GENERIC_PACK: /modpacks/NipRip.zip
+
+      # needs to match RWA_RCON_PASSWORD on web container
+      RCON_PASSWORD: "ncc2cmC3_Ht9YRLnN!QZ"
+    volumes:
+      - /MC:/data
+      - /MC/modpacks:/modpacks:ro
+    restart: unless-stopped
+
+# RWA RCON
+  web:
+    image: itzg/rcon
+    container_name: RWA-RCON
+    ports:
+      - 4326:4326
+      - 4327:4327
+    environment:
+      TZ: AMERICA/CHICAGO
+
+      # UN and PW to RWA UI
+      RWA_USERNAME: "matt_rwa"
+      RWA_PASSWORD: "uf98idoBWF83gs@z@pm7"
+      RWA_ADMIN: "TRUE"
+
+      # is referring to the hostname of 'mc' compose service below
+      RWA_RCON_HOST: mc
+
+      # needs to match the RCON_PASSWORD configured for the container
+      RWA_RCON_PASSWORD: "ncc2cmC3_Ht9YRLnN!QZ"
+    restart: unless-stopped
+    depends_on:
+      - mc
