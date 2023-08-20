@@ -22,11 +22,17 @@ services:
     container_name: dozzle
     image: amir20/dozzle:latest
     environment:
-      DOZZLE_REMOTE_HOST: tcp://192.168.50.39:2375
+      DOZZLE_REMOTE_HOST: tcp://192.168.50.7:2375
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - 9999:8080
+   
+# cAdvisor
+
+# Glances
+
+# Healthchecks
             
 ########################################################
 
@@ -57,6 +63,12 @@ services:
         max-file: "10"
         max-size: "200k"
     restart: unless-stopped
+
+# SmokePing
+
+# StatPing
+
+# LibreSpeed
 
 # NetData
 
