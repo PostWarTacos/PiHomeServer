@@ -22,18 +22,40 @@ services:
     container_name: dozzle
     image: amir20/dozzle:latest
     environment:
-      DOZZLE_REMOTE_HOST: tcp://192.168.50.7:2375
+      DOZZLE_REMOTE_HOST: tcp://192.168.50.7:2375,tcp://192.168.50.39:2375
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - 9999:8080
+    restart: unless-stopped
    
 # cAdvisor
+  cadvisor:
+    container_name: cadvisor
+    image: budry/cadvisor-arm:latest
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    detach: "true"
+    ports: 8282:8080
+    restart: unless-stopped
 
 # Glances
-
-# Healthchecks
-            
+  glances:
+    container_name: glances
+    image: nicolargo/glances:latest-full
+    pid: host
+    network_mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /run/user/1000/podman/podman.sock:/run/user/1000/podman/podman.sock
+    environment:
+      GLANCES_OPT: -w
+    restart: unless-stopped
+    
 ########################################################
 
 # Network Management
@@ -41,7 +63,24 @@ services:
 ########################################################
 
 # PiHole-Unbound
-
+  pihole-unbound: 
+    container_name: pihole-unbound
+    image: cbcrowe/pihole-unbound:latest
+    hostname: pihole
+    ports:
+      53:53/tcp
+      53:53/udp
+      1010:80/tcp
+      4443:443/tcp
+    environment:
+      serverip: "192.168.50.43"
+      TZ: AMERICA/CHICAGO
+      DNSSEC: "true"
+    volumes:
+      - /dockerdata/PiHole-Unbound:/etc/pihole
+      - /dockerdata/PiHole-Unbound/DNS:/etc/dnsmasq.d
+    restart: unless-stopped
+      
 # Speedtest-Tracker
   speedtest:
     container_name: speedtest
@@ -65,11 +104,35 @@ services:
     restart: unless-stopped
 
 # SmokePing
-
-# StatPing
-
+  smokeping:
+    container_name: smokeping
+    image: lscr.io/linuxserver/smokeping:latest
+    environment:
+      - PUID: 1000
+      - PGID: 1000
+      - TZ: AMERICA/CHICAGO
+    volumes:
+      - /path/to/smokeping/config:/config
+      - /path/to/smokeping/data:/data
+    ports:
+      - 8383:80
+    restart: unless-stopped
+    
 # LibreSpeed
-
+  librespeed:
+    container_name: librespeed
+    image: lscr.io/linuxserver/librespeed:latest
+    environment:
+      - PUID: 1000
+      - PGID: 1000
+      - TZ: AMERICA/CHICAGO
+      - PASSWORD: FDfd24()
+    volumes:
+      - /dockerdata/librespeed:/config
+    ports:
+      - 8484:80
+    restart: unless-stopped
+    
 # NetData
 
 ########################################################
