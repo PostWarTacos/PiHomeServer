@@ -1,0 +1,99 @@
+# Docker compose to set up containers for all services you need:
+#
+#   Homepage, Homarr, Your_Spotify
+#   Dozzle, PiHole-Unbound, Speedtest-Tracker, NetData, Nextcloud
+#
+# Before running docker-compose, you should pre-create all of the following folders.
+
+# Folders for Docker State:
+# /dockerdata                       - docker root
+
+version: "3"
+services:
+
+########################################################
+
+# Docker Management
+
+########################################################
+
+# Dozzle
+  dozzle:
+    container_name: dozzle
+    image: amir20/dozzle:latest
+    environment:
+      DOZZLE_REMOTE_HOST: tcp://192.168.50.7:2375
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 9999:8080
+   
+# cAdvisor
+
+# Glances
+
+# Healthchecks
+            
+########################################################
+
+# Network Management
+
+########################################################
+
+# PiHole-Unbound
+
+# Speedtest-Tracker
+  speedtest:
+    container_name: speedtest
+    image: henrywhitaker3/speedtest-tracker:dev-arm
+    environment:
+      - TZ=AMERICA/CHICAGO
+      - DEFAULT=true
+      - PGID=1000
+      - PUID=1000
+      - OOKLA_EULA_GDPR=true
+      - NAME=OOKLA_EULA_GDPR
+    volumes:
+      - /dockerdata/speedtest:/config
+    ports:
+      - 8765:80/tcp
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "200k"
+    restart: unless-stopped
+
+# SmokePing
+
+# StatPing
+
+# LibreSpeed
+
+# NetData
+
+########################################################
+
+# Websites
+
+########################################################
+
+# Homarr
+
+# Homepage
+
+# Your_Spotify
+
+########################################################
+
+# Servers
+
+########################################################
+
+# Nextcloud
+
+########################################################
+
+# Secrets
+
+########################################################
