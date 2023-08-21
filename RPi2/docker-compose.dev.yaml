@@ -32,30 +32,19 @@ services:
 # cAdvisor
   cadvisor:
     container_name: cadvisor
-    image: budry/cadvisor-arm:latest
+    image: gcr.io/cadvisor/cadvisor-arm64:v0.47.2
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
-    detach: "true"
-    ports: 8282:8080
-    restart: unless-stopped
-
-# Glances
-  glances:
-    container_name: glances
-    image: nicolargo/glances:latest-full
-    pid: host
-    network_mode: host
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /run/user/1000/podman/podman.sock:/run/user/1000/podman/podman.sock
     environment:
-      GLANCES_OPT: -w
+      detach: "true"
+    ports:
+      - 8282:8080
     restart: unless-stopped
-    
+ 
 ########################################################
 
 # Network Management
@@ -68,14 +57,14 @@ services:
     image: cbcrowe/pihole-unbound:latest
     hostname: pihole
     ports:
-      53:53/tcp
-      53:53/udp
-      1010:80/tcp
-      4443:443/tcp
+      - 53:53/tcp
+      - 53:53/udp
+      - 1010:80/tcp
+      - 4443:443/tcp
     environment:
-      serverip: "192.168.50.43"
+      serverip: 192.168.50.43
       TZ: AMERICA/CHICAGO
-      DNSSEC: "true"
+      #DNSSEC: "true"
     volumes:
       - /dockerdata/PiHole-Unbound:/etc/pihole
       - /dockerdata/PiHole-Unbound/DNS:/etc/dnsmasq.d
@@ -108,12 +97,12 @@ services:
     container_name: smokeping
     image: lscr.io/linuxserver/smokeping:latest
     environment:
-      - PUID: 1000
-      - PGID: 1000
-      - TZ: AMERICA/CHICAGO
+      PUID: 1000
+      PGID: 1000
+      TZ: AMERICA/CHICAGO
     volumes:
-      - /path/to/smokeping/config:/config
-      - /path/to/smokeping/data:/data
+      - /dockerdata/smokeping/config:/config
+      - /dockerdata/smokeping/data:/data
     ports:
       - 8383:80
     restart: unless-stopped
@@ -123,10 +112,10 @@ services:
     container_name: librespeed
     image: lscr.io/linuxserver/librespeed:latest
     environment:
-      - PUID: 1000
-      - PGID: 1000
-      - TZ: AMERICA/CHICAGO
-      - PASSWORD: FDfd24()
+      PUID: 1000
+      PGID: 1000
+      TZ: AMERICA/CHICAGO
+      PASSWORD: FDfd24()
     volumes:
       - /dockerdata/librespeed:/config
     ports:
