@@ -9,143 +9,25 @@
 # /dockerdata                       - docker root
 
 version: "3"
+
 services:
 
-########################################################
-
-# Docker Management
-
-########################################################
-
-# Dozzle
-  dozzle:
-    container_name: dozzle
-    image: amir20/dozzle:latest
-    environment:
-      DOZZLE_REMOTE_HOST: tcp://192.168.50.7:2375,tcp://192.168.50.39:2375
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - 9999:8080
-    restart: unless-stopped
-   
 # cAdvisor
   cadvisor:
     container_name: cadvisor
     image: gcr.io/cadvisor/cadvisor-arm64:v0.47.2
     volumes:
       - /:/rootfs:ro
+      - /etc/machine-id:/etc/machine-id:ro
+      - /proc/cpuinfo:/proc/cpuinfo:ro
+      - /dev/kmsg:/dev/kmsg:rw
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
-    environment:
-      detach: "true"
+    # environment:
+      # detach: "true"
     ports:
       - 8282:8080
+    privileged: "true"
     restart: unless-stopped
- 
-########################################################
-
-# Network Management
-
-########################################################
-
-# PiHole-Unbound
-  pihole-unbound: 
-    container_name: pihole-unbound
-    image: cbcrowe/pihole-unbound:latest
-    hostname: pihole
-    ports:
-      - 53:53/tcp
-      - 53:53/udp
-      - 1010:80/tcp
-      - 4443:443/tcp
-    environment:
-      serverip: 192.168.50.43
-      TZ: AMERICA/CHICAGO
-      #DNSSEC: "true"
-    volumes:
-      - /dockerdata/PiHole-Unbound:/etc/pihole
-      - /dockerdata/PiHole-Unbound/DNS:/etc/dnsmasq.d
-    restart: unless-stopped
-      
-# Speedtest-Tracker
-  speedtest:
-    container_name: speedtest
-    image: henrywhitaker3/speedtest-tracker:dev-arm
-    environment:
-      - TZ=AMERICA/CHICAGO
-      - DEFAULT=true
-      - PGID=1000
-      - PUID=1000
-      - OOKLA_EULA_GDPR=true
-      - NAME=OOKLA_EULA_GDPR
-    volumes:
-      - /dockerdata/speedtest:/config
-    ports:
-      - 8765:80/tcp
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "10"
-        max-size: "200k"
-    restart: unless-stopped
-
-# SmokePing
-  smokeping:
-    container_name: smokeping
-    image: lscr.io/linuxserver/smokeping:latest
-    environment:
-      PUID: 1000
-      PGID: 1000
-      TZ: AMERICA/CHICAGO
-    volumes:
-      - /dockerdata/smokeping/config:/config
-      - /dockerdata/smokeping/data:/data
-    ports:
-      - 8383:80
-    restart: unless-stopped
-    
-# LibreSpeed
-  librespeed:
-    container_name: librespeed
-    image: lscr.io/linuxserver/librespeed:latest
-    environment:
-      PUID: 1000
-      PGID: 1000
-      TZ: AMERICA/CHICAGO
-      PASSWORD: FDfd24()
-    volumes:
-      - /dockerdata/librespeed:/config
-    ports:
-      - 8484:80
-    restart: unless-stopped
-    
-# NetData
-
-########################################################
-
-# Websites
-
-########################################################
-
-# Homarr
-
-# Homepage
-
-# Your_Spotify
-
-########################################################
-
-# Servers
-
-########################################################
-
-# Nextcloud
-
-########################################################
-
-# Secrets
-
-########################################################
