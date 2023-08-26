@@ -1,13 +1,3 @@
-# Docker compose to set up containers for all services you need:
-#
-#   Homepage, Homarr, Your_Spotify
-#   Dozzle, PiHole-Unbound, Speedtest-Tracker, NetData, Nextcloud
-#
-# Before running docker-compose, you should pre-create all of the following folders.
-
-# Folders for Docker State:
-# /dockerdata                       - docker root
-
 version: "3"
 
 services:
