@@ -145,6 +145,8 @@ read -p "This step will create an NFS share on remote and connect to it. Do you 
 if [ $nfs_answer == 'y' ] || [ $nfs_answer == 'Y' ]; then
   # Prompt for NFS shares to be created on remote system
   read -p "User must create NFS shares on remote PC. Press enter when action is completed." useless_answer
+  echo "Installing NFS utilities"
+  apt install nfs-common
   read -p "Enter IP address of remote PC: " remote_ip
   read -p "Enter full path of the NFS share created on remote PC (/volume1/Plex): " remote_nfs
 
@@ -158,7 +160,9 @@ if [ $nfs_answer == 'y' ] || [ $nfs_answer == 'Y' ]; then
 
   # Mount NFS in /etc/fstab
   # <file system>                       <dir>           <type>  <options>       <dump>  <pass>
+  chown $USER /etc/fstab
   echo "$remote_ip:$remote_nfs          $local_nfs      nfs     defaults        0       0" >> /etc/fstab
+  chown root /etc/fstab
   echo "NFS share should appear at $local_nfs after reboot "
 fi
 
