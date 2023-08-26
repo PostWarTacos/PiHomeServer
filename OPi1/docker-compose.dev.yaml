@@ -1,0 +1,25 @@
+version: "3"
+services:
+
+########################################################
+
+# Monitoring
+
+########################################################
+     
+# cAdvisor
+  cadvisor:
+    container_name: cadvisor
+    image: gcr.io/cadvisor/cadvisor-arm64:v0.47.2
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    environment:
+      detach: "true"
+    ports:
+      - 8282:8080
+    restart: unless-stopped
+    
