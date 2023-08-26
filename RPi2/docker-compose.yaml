@@ -22,26 +22,60 @@ services:
     container_name: dozzle
     image: amir20/dozzle:latest
     environment:
-      DOZZLE_REMOTE_HOST: tcp://192.168.50.7:2375
+      DOZZLE_REMOTE_HOST: tcp://192.168.50.7:2375,tcp://192.168.50.39:2375
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - 9999:8080
+    restart: unless-stopped
    
 # cAdvisor
+  cadvisor:
+    container_name: cadvisor
+    image: gcr.io/cadvisor/cadvisor-arm64:v0.47.2
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    environment:
+      detach: "true"
+    ports:
+      - 8282:8080
+    restart: unless-stopped
 
-# Glances
-
-# Healthchecks
-            
 ########################################################
 
 # Network Management
 
 ########################################################
 
-# PiHole-Unbound
-
+# Pi-hole Unbound
+  pihole_unbound:
+    container_name: pihole
+    image: cbcrowe/pihole-unbound:latest
+    ports:
+      - "4443:443/tcp"
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "1110:80/tcp" #Allows use of different port to access pihole web interface when other docker containers use port 80
+      - "5335:5335/tcp" # Uncomment to enable unbound access on local server
+      # - 22/tcp # Uncomment to enable SSH
+    environment:
+      - FTLCONF_LOCAL_IPV4=192.168.50.43
+      - HOSTNAME=pihole
+      - TZ=AMERICA/CHICAGO
+      # - WEBPASSWORD=12QWASZX
+      - WEBTHEME=default-dark
+      - PIHOLE_DNS_=127.0.0.1#5335
+      - DNSSEC="true"
+      - DNSMASQ_LISTENING=single
+    volumes:
+      - /dockerdata/pihole-unbound:/etc/pihole:rw
+      - /dockerdata/dnsmasq-unbound:/etc/dnsmasq.d:rw
+    restart: unless-stopped
+            
 # Speedtest-Tracker
   speedtest:
     container_name: speedtest
@@ -65,11 +99,35 @@ services:
     restart: unless-stopped
 
 # SmokePing
-
-# StatPing
-
+  smokeping:
+    container_name: smokeping
+    image: lscr.io/linuxserver/smokeping:latest
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: AMERICA/CHICAGO
+    volumes:
+      - /dockerdata/smokeping/config:/config
+      - /dockerdata/smokeping/data:/data
+    ports:
+      - 8383:80
+    restart: unless-stopped
+    
 # LibreSpeed
-
+  librespeed:
+    container_name: librespeed
+    image: lscr.io/linuxserver/librespeed:latest
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: AMERICA/CHICAGO
+      # PASSWORD: FDfd24()
+    volumes:
+      - /dockerdata/librespeed:/config
+    ports:
+      - 8484:80
+    restart: unless-stopped
+    
 # NetData
 
 ########################################################
