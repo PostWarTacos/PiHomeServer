@@ -77,7 +77,7 @@ services:
       RWA_PASSWORD: "uf98idoBWF83gs@z@pm7"
       RWA_ADMIN: "TRUE"
 
-      # is referring to the hostname of 'mc' compose service below
+      # is referring to the hostname of 'mc' compose service above
       RWA_RCON_HOST: mc
 
       # needs to match the RCON_PASSWORD configured for the container
@@ -85,3 +85,44 @@ services:
     restart: unless-stopped
     depends_on:
       - mc
+
+########################################################
+
+# Monitoring
+
+########################################################
+     
+# cAdvisor
+  cadvisor:
+    container_name: cadvisor
+    image: gcr.io/cadvisor/cadvisor-arm64:v0.47.2
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    environment:
+      detach: "true"
+    ports:
+      - 8282:8080
+    restart: unless-stopped
+    
+########################################################
+
+# Docker Management
+
+########################################################
+
+# Docker Socket Proxy
+  socket-proxy:
+    container_name: docker-socket-proxy
+    image: tecnativa/docker-socket-proxy
+    privileged: true
+    environment:
+      CONTAINERS: 1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 2375:2375
+    restart: unless-stopped
