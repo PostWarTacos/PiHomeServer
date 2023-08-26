@@ -11,8 +11,8 @@ Start-Service ssh-agent
 Get-Service ssh-agent
 
 $key_pair_name = read-host "Enter the name used for key pair: "
-$username = "Enter username on remote PC: "
-$remote_ip = "Enter IP of remote PC: "
+$username = read-host "Enter username on remote PC: "
+$remote_ip = read-host "Enter IP of remote PC: "
 
 # Now load your key files into Windows ssh-agent
 ssh-add $env:USERPROFILE\.ssh\$key_pair_name
