@@ -2,6 +2,8 @@
 #   
 #   Minecraft
 #   RWA-RCON
+#   cAdvisor
+#   Docker Socket Proxy
 #
 # Before running docker-compose, you should pre-create all of the following folders.
 
