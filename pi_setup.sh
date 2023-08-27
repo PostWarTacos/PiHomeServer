@@ -156,6 +156,7 @@ if [ $nfs_answer == 'y' ] || [ $nfs_answer == 'Y' ]; then
 
   # Apply folder permissions
   chown $new_user -R $local_nfs
+  chgrp root -R $local_nfs
   chmod 755 -R $local_nfs
 
   # Mount NFS in /etc/fstab
