@@ -55,7 +55,7 @@ services:
       TYPE: FORGE
       VERSION: 1.19.2
       FORGE_VERSION: 43.2.21
-      GENERIC_PACK: /modpacks/NipRip.zip
+      #GENERIC_PACK: /modpacks/NipRip.zip
       CF_API_KEY: '2c58139d-65d3-4cc7-90b7-ef3cd1dd0b0d'
       CF_SLUG: NipRip
       CF_FILE_ID: 4687503
