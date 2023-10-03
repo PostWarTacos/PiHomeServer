@@ -41,24 +41,32 @@ services:
       DEBUG: "true"
 
       # Hardware configs
-      MEMORY: 10G
+      MEMORY: 13G
       VIEW_DISTANCE: 10
       MAX_PLAYERS: 10
 
       # Permissions based settings
       PVP: "false"
       CONSOLE: "false"
-      ALLOW_FLIGHT: "false"
+      ALLOW_FLIGHT: "true"
       OPS: "PostWarTacos"
 
       # MODS
-      TYPE: FORGE
+      TYPE: AUTO_CURSEFORGE
       VERSION: 1.19.2
       FORGE_VERSION: 43.2.21
-      #GENERIC_PACK: /modpacks/NipRip.zip
-      CF_API_KEY: '2c58139d-65d3-4cc7-90b7-ef3cd1dd0b0d'
-      CF_SLUG: NipRip
-      CF_FILE_ID: 4687503
+      CF_API_KEY: '$2a$10$1mcx8G4FszeBFWuwtvgmOeC/e0VogiSVGk/fgSIhTcMns1YiULFn2'
+      #CF_PAGE_URL: 'https://www.curseforge.com/minecraft/modpacks/niprip/files/4687503'
+      CF_SLUG: niprip
+      # CF_FILE_ID: 4687503 # v1.0
+      # CF_FILE_ID: 4734216 # v1.2.1
+      # CF_FILE_ID: 4744527 # v1.3
+      # CF_FILE_ID:  4744623 # v1.3.1
+      # CF_FILE_ID:  4751482 # v1.3.1.1
+      # CF_FILE_ID:  4760856 # v1.3.1.2
+      # CF_FILE_ID:  4764477 # v1.3.2
+      # CF_FILE_ID:  4773172 # v1.3.3
+      CF_FILE_ID:  4774411 # v1.3.4
       
       # needs to match RWA_RCON_PASSWORD on web container
       RCON_PASSWORD: "ncc2cmC3_Ht9YRLnN!QZ"
